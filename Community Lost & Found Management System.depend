@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1768881359 source:c:\users\user\desktop\data structures\group project\community lost & found management system\main.cpp
+	<iostream>
+	"Community Lost & Found Management System.h"
+
+1768980462 c:\users\user\desktop\data structures\group project\community lost & found management system\community lost & found management system.h
+	<iostream>
+	<string>
+
