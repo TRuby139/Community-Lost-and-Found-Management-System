@@ -89,7 +89,7 @@ private:
 
     // 2. Hash Table, use this because this is fast
     static const int TABLE_SIZE = 30;
-    Node* Hash_Table[TABLE_SIZE];
+    Node** Hash_Table; // Dynamic allocation, Pointer to a pointer
 
     // --- MERGE SORT ---
 
@@ -238,10 +238,19 @@ public:
         head = nullptr;
         tail = nullptr;
 
+        // Dynamically allocate the array
+        Hash_Table = new Node*[TABLE_SIZE];
+
         // Initialize all Hash Table buckets to nullptr
         for(int i = 0; i < TABLE_SIZE; i++) {
             Hash_Table[i] = nullptr;
         }
+    }
+
+        // Destructor: Cleans up memory when program closes
+    ~Lost_and_Found() {
+        // Delete the Hash Table Array
+        delete[] Hash_Table;
     }
 
     // Function 1 - Add Item, Use Hashing and Linked list
@@ -297,18 +306,20 @@ public:
             Node *current = Hash_Table[index];
 
             // Only search the list in this bucket, with sequential search
+            cout << "\n----------------------------------------------------------------------------------------------------------------------------\n";
             while (current != nullptr) {
                 if (current->details.Item_Name == NAME) {
-                    cout << "ID: " << current->details.id
-                     << " | Name: " << current->details.Item_Name
-                     << " | Category: " << current->details.category
-                     << " | Location Found: " << current->details.Location_Found
-                     << " | Date: " << current->details.date
-                     << " | Status: " << current->details.status << endl;
+                    cout << left << setw(4) << "ID: " << setw(5) << current->details.id
+                        << setw(7) << "|Name: " << setw(22) << current->details.Item_Name
+                        << setw(11) << "|Category: " << setw(14) << current->details.category
+                        << setw(17) << "|Location Found: " << setw(14) << current->details.Location_Found
+                        << setw(7) << "|Date: " << setw(10) << current->details.date
+                        << setw(8) << "|Status: " << setw(7) << current->details.status << "\n";
                     found = true;
                 }
                 current = current->Next_Bucket; // Move using the Hash pointer
             }
+            cout << "----------------------------------------------------------------------------------------------------------------------------\n";
             if (!found){
                     cout << "Item Name " << NAME << " not found." << endl;
             }
@@ -333,6 +344,7 @@ public:
             switch(choice){
                 case 1:
                     current = tail;
+                    cout << "\n----------------------------------------------------------------------------------------------------------------------------\n";
                     while (current != nullptr) {
                         cout << left << setw(4) << "ID: " << setw(5) << current->details.id
                             << setw(7) << "|Name: " << setw(22) << current->details.Item_Name
@@ -342,9 +354,12 @@ public:
                             << setw(8) << "|Status: " << setw(7) << current->details.status << "\n";
                         current = current->prev; // Move using the LIST pointer
                     }
+                    cout << "----------------------------------------------------------------------------------------------------------------------------\n";
+
                     break;
                 case 2:
                     current = head;
+                    cout << "\n----------------------------------------------------------------------------------------------------------------------------\n";
                     while (current != nullptr) {
                         cout << left << setw(4) << "ID: " << setw(5) << current->details.id
                             << setw(7) << "|Name: " << setw(22) << current->details.Item_Name
@@ -354,6 +369,7 @@ public:
                             << setw(8) << "|Status: " << setw(7) << current->details.status << "\n";
                         current = current->next;// Move using the LIST pointer
                     }
+                    cout << "----------------------------------------------------------------------------------------------------------------------------\n";
                     break;
                 default:
                     cout << "Invalid input !\n";
