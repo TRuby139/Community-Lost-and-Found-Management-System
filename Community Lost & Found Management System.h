@@ -3,8 +3,16 @@
 
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
+
+// ANSI Color Codes for UI Design
+#define RESET   "\033[0m"
+#define RED     "\033[31m"      // For Errors
+#define GREEN   "\033[32m"      // For Success
+#define YELLOW  "\033[33m"      // For Prompts
+#define CYAN    "\033[36m"      // For Titles/Borders
 
 struct Item {
     int id;
@@ -25,6 +33,53 @@ struct Node {
     // If two IDs have the same hash, they form a mini-list using this pointer.
     Node *Next_Bucket;
 };
+
+void Clear_Screen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+void Pause() {
+    cout << "\n" << YELLOW << "Press Enter to continue..." << RESET;
+    char temp;
+    cin.get(temp);
+}
+
+bool Login() {
+    string username, password;
+    int attempts = 0;
+
+    while (attempts < 3) {
+        Clear_Screen();
+        // Color: Cyan for Border
+        cout << CYAN << "============================================\n";
+        cout << "      SYSTEM SECURITY CHECK      \n";
+        cout << "============================================" << RESET << "\n";
+        cout << "Default credentials (admin / 1234)\n\n";
+
+        cout << "Enter Username: "; cin >> username;
+        cout << "Enter Password: "; cin >> password;
+
+        if (username == "admin" && password == "1234") {
+            // Color: Green for Success
+            cout << "\n" << GREEN << "Login Successful! Access Granted." << RESET << "\n";
+            cin.ignore();
+            Pause();
+            return true;
+        } else {
+            // Color: Red for Error
+            cout << "\n" << RED << "Access Denied! Incorrect credentials." << RESET << "\n";
+            attempts++;
+            cout << YELLOW << "Attempts remaining: " << (3 - attempts) << RESET << endl;
+            cin.ignore();
+            Pause();
+        }
+    }
+    return false;
+}
 
 class Lost_and_Found {
 private:
@@ -65,7 +120,7 @@ private:
         if (second == nullptr) return first;
 
         // Sorting by NAME (A-Z)
-        if (To_Upper_Case(first->details.Item_Name) < To_Upper_Case(second->details.Item_Name)) {
+        if (To_Upper_Case(first->details.Item_Name) > To_Upper_Case(second->details.Item_Name)) {
             // Recursively merge the rest of the lists and
             // link the result to the current node
             first->next = Merge_Alpha(first->next, second);
@@ -111,10 +166,10 @@ private:
         if (second == nullptr) return first;
 
         // Sorting by Date
-            if (first->details.date < second->details.date) {
+            if (first->details.date > second->details.date) {
                 // Recursively merge the rest of the lists and
                 // link the result to the current node
-                first->next = Merge_Alpha(first->next, second);
+                first->next = Merge_Date(first->next, second);
                 if (first->next != NULL) {
                     first->next->prev = first;
                 }
@@ -122,7 +177,7 @@ private:
                 return first;
             }
             else {
-                second->next = Merge_Alpha(first, second->next);
+                second->next = Merge_Date(first, second->next);
                 if (second->next != NULL) {
                     second->next->prev = second;
                 }
@@ -269,7 +324,7 @@ public:
         else{
             int choice;
             Node* current = nullptr;
-            cout << "Display in \n 1. Ascending \n 2. Descending \n";
+            cout << "Display in \n 1.Ascending \n 2.Descending \n";
             cout << "Enter your choice (1 or 2): ";
             cin >> choice;
             cin.ignore(); // Clear buffer to prevent getline errors
@@ -279,31 +334,32 @@ public:
                 case 1:
                     current = tail;
                     while (current != nullptr) {
-                        cout << "ID: " << current->details.id
-                             << " | Name: " << current->details.Item_Name
-                             << " | Category: " << current->details.category
-                             << " | Location Found: " << current->details.Location_Found
-                             << " | Date: " << current->details.date
-                             << " | Status: " << current->details.status << "\n";
+                        cout << left << setw(4) << "ID: " << setw(5) << current->details.id
+                            << setw(7) << "|Name: " << setw(22) << current->details.Item_Name
+                            << setw(11) << "|Category: " << setw(14) << current->details.category
+                            << setw(17) << "|Location Found: " << setw(14) << current->details.Location_Found
+                            << setw(7) << "|Date: " << setw(10) << current->details.date
+                            << setw(8) << "|Status: " << setw(7) << current->details.status << "\n";
                         current = current->prev; // Move using the LIST pointer
                     }
                     break;
                 case 2:
                     current = head;
                     while (current != nullptr) {
-                        cout << "ID: " << current->details.id
-                             << " | Name: " << current->details.Item_Name
-                             << " | Category: " << current->details.category
-                             << " | Location Found: " << current->details.Location_Found
-                             << " | Date: " << current->details.date
-                             << " | Status: " << current->details.status << "\n";
-                        current = current->next; // Move using the LIST pointer
+                        cout << left << setw(4) << "ID: " << setw(5) << current->details.id
+                            << setw(7) << "|Name: " << setw(22) << current->details.Item_Name
+                            << setw(11) << "|Category: " << setw(14) << current->details.category
+                            << setw(17) << "|Location Found: " << setw(14) << current->details.Location_Found
+                            << setw(7) << "|Date: " << setw(10) << current->details.date
+                            << setw(8) << "|Status: " << setw(7) << current->details.status << "\n";
+                        current = current->next;// Move using the LIST pointer
                     }
                     break;
                 default:
                     cout << "Invalid input !\n";
                     break;
             }
+
         }
     }
 
@@ -315,7 +371,8 @@ public:
         }
         else{
             int choose;
-            cout << "Sort: \n1. Sort by alphabet \n2.Sort by date";
+            cout << "Sort: \n1.Sort by alphabet \n2.Sort by date\n";
+            cout << "Enter your choice: ";
             cin >> choose;
             cin.ignore();
 
@@ -368,10 +425,10 @@ public:
 
             // Step 2: Show Edit Item Details
             cout << "\n--- Editing Item: " << current->details.Item_Name << " ---\n";
-            cout << "1. Category: " << current->details.category << ")\n";
-            cout << "2. Location: " << current->details.Location_Found << ")\n";
-            cout << "3. Date: " << current->details.date << ")\n";
-            cout << "4. Status: " << current->details.status << ")\n";
+            cout << left <<setw(15) << "1. Category: " << current->details.category << "\n";
+            cout << setw(15) << "2. Location: " << current->details.Location_Found << "\n";
+            cout << setw(15) << "3. Date: " << current->details.date << "\n";
+            cout << setw(15) << "4. Status: " << current->details.status << "\n";
             cout << "0. Cancel\n";
             cout << "Select field to edit: ";
 
@@ -487,6 +544,5 @@ public:
             cout << "Item ID: " << Delete_ID << " deleted.\n";
         }
     }
-
 };
 #endif // COMMUNITY_LOST_&_FOUND_MANAGEMENT_SYSTEM_H_INCLUDED
